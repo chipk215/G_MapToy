@@ -42,7 +42,9 @@
             class="com.google.android.gms.maps.SupportMapFragment"
             map:cameraTargetLat="43.615032"
             map:cameraTargetLng="-116.202335"
-            map:cameraZoom="15" />
+            map:cameraZoom="15"
+            map:uiCompass="true"
+            />
     </LinearLayout>
 </LinearLayout>
 
