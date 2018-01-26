@@ -1,13 +1,12 @@
 package com.keyes_west.mapsgetstarted;
 
 
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
@@ -16,12 +15,13 @@ import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.SupportStreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.StreetViewPanoramaCamera;
 import com.google.android.gms.maps.model.StreetViewPanoramaLocation;
+
 
 public class MapsActivity extends AppCompatActivity
         implements GoogleMap.OnMarkerDragListener,
@@ -34,6 +34,7 @@ public class MapsActivity extends AppCompatActivity
 
     private static final LatLng BOISE = new LatLng(43.615032, -116.202335);
 
+    //Possibly wrap the marker into a IconMarker object that includes the offset
     private static final float ICON_BEARING_OFFSET = 133.0f;
 
     private StreetViewPanorama mStreetViewPanorama;
@@ -167,7 +168,6 @@ public class MapsActivity extends AppCompatActivity
         mStreetViewPanorama.setPosition(marker.getPosition(), 150);
 
 
-
     }
 
     @Override
@@ -176,53 +176,27 @@ public class MapsActivity extends AppCompatActivity
         if (location != null) {
             mMarker.setPosition(location.position);
 
-        //    rotateCamera();
-
-         //   rotateMapCamera();
 
             float svpCameraBearing = mStreetViewPanorama.getPanoramaCamera().bearing;
             Log.i(TAG, "Camera bearing: " + svpCameraBearing);
             mMarker.setRotation(addMarkerIconOffset(svpCameraBearing));
 
-            //move pegman 1 inch to the right
-            //get the screen coordinates of pegman
-          //  Point screenPosition = mProjection.toScreenLocation(mMarker.getPosition());
-          //  Log.i(TAG, "Marker Screen X= " + screenPosition.x +
-          //          " Marker Screen Y= " + screenPosition.y);
 
-           // screenPosition.x = screenPosition.x + 400;
-           // LatLng newPos = mProjection.fromScreenLocation(screenPosition);
-           // mMarker.setPosition(newPos);
-
-           // mMarker.setRotation(90.0f);
         }
     }
 
-    private void rotateMapCamera(){
-
-        CameraPosition camPos = mMap.getCameraPosition();
-        CameraPosition newPos = new CameraPosition.Builder()
-                .target(camPos.target)
-                .zoom(camPos.zoom)
-                .bearing(camPos.bearing - 60.0f)
-                .tilt(camPos.tilt)
-                .build();
-
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(newPos));
 
 
-    }
+    private void rotatePanoramaCamera(float angle, int milliSecondsDuration){
 
-    private void rotatePanoramaCamera(){
-        long duration = 2000;
 
         StreetViewPanoramaCamera camera = new StreetViewPanoramaCamera.Builder()
                 .zoom(mStreetViewPanorama.getPanoramaCamera().zoom)
                 .tilt(mStreetViewPanorama.getPanoramaCamera().tilt)
-                .bearing(mStreetViewPanorama.getPanoramaCamera().bearing - 180)
+                .bearing(mStreetViewPanorama.getPanoramaCamera().bearing - angle)
                 .build();
 
-        mStreetViewPanorama.animateTo(camera, duration);
+        mStreetViewPanorama.animateTo(camera, milliSecondsDuration);
     }
 
     @Override
