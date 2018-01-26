@@ -9,6 +9,15 @@ import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
+
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -19,7 +28,7 @@ import java.util.List;
 public class DirectionsActivity extends AppCompatActivity {
 
     private static final String TAG= "DirectionsActivity";
-
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -32,12 +41,13 @@ public class DirectionsActivity extends AppCompatActivity {
             @Override
             public void onMapReady(GoogleMap map) {
                 Log.i(TAG, "onMapReady Invoked");
+                mMap = map;
+                new FetchDirectionsTask(null).execute();
 
             }
         });
 
 
-        new FetchDirectionsTask(null).execute();
     }
 
 
@@ -57,7 +67,20 @@ public class DirectionsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String jsonResponse){
-            Log.i(TAG, jsonResponse);
+
+            try {
+                JSONObject jsonBody = new JSONObject(jsonResponse);
+                JSONArray routes = jsonBody.getJSONArray("routes");
+                JSONObject route = routes.getJSONObject(0);
+                JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
+                String encodedPoints = overviewPolyline.getString("points");
+                Log.i(TAG, "Encoded points: " + encodedPoints);
+                List<LatLng> decodedPath = PolyUtil.decode(encodedPoints);
+                mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+
+            }catch(JSONException je){
+                Log.e(TAG, "Failed to parse JSON", je);
+            }
         }
     }
 }
