@@ -1,10 +1,13 @@
 package com.keyes_west.mapsgetstarted;
 
 
+
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 
 
 import com.google.android.gms.maps.GoogleMap;
@@ -57,9 +60,18 @@ public class MapsActivity extends AppCompatActivity
             markerPosition = savedInstanceState.getParcelable(MARKER_POSITION_KEY);
         }
 
-        SupportStreetViewPanoramaFragment streetViewPanoramaFragment =
+        final SupportStreetViewPanoramaFragment streetViewPanoramaFragment =
                 (SupportStreetViewPanoramaFragment)
                         getSupportFragmentManager().findFragmentById(R.id.streetviewpanorama);
+
+
+        // this hides the fragment
+        //streetViewPanoramaFragment.getView().setVisibility(View.GONE);
+
+        // another way
+        getSupportFragmentManager().beginTransaction().hide(streetViewPanoramaFragment).commit();
+
+
 
         streetViewPanoramaFragment.getStreetViewPanoramaAsync(
                 new OnStreetViewPanoramaReadyCallback() {
@@ -75,6 +87,8 @@ public class MapsActivity extends AppCompatActivity
                             mStreetViewPanorama.setPosition(BOISE);
                         }
                     }
+
+
                 });
 
         SupportMapFragment mapFragment =
@@ -95,6 +109,24 @@ public class MapsActivity extends AppCompatActivity
                            // mMarker.setRotation(currentRotation + 15.0f);
                         }
                         return true;
+                    }
+                });
+
+
+                map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener(){
+                    @Override
+                    public void onCameraIdle(){
+                        float zoom = mMap.getCameraPosition().zoom;
+                        Log.i(TAG,"Min Zoom= " + mMap.getMinZoomLevel()  + "  Max Zoom= " + mMap.getMaxZoomLevel());
+                        Log.i(TAG, "Camera Zoom level: " + zoom);
+                        if (zoom < 15){
+                            // hide street view
+                            getSupportFragmentManager().beginTransaction().hide(streetViewPanoramaFragment).commit();
+                        }else  {
+                            // show street view
+                            getSupportFragmentManager().beginTransaction().show(streetViewPanoramaFragment).commit();
+                        }
+
                     }
                 });
                 // Creates a draggable marker. Long press to drag.
