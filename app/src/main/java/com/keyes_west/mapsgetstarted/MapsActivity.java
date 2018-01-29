@@ -3,11 +3,14 @@ package com.keyes_west.mapsgetstarted;
 
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Slide;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
+import android.view.Gravity;
+import android.view.ViewGroup;
 
 
 import com.google.android.gms.maps.GoogleMap;
@@ -26,19 +29,25 @@ import com.google.android.gms.maps.model.StreetViewPanoramaCamera;
 import com.google.android.gms.maps.model.StreetViewPanoramaLocation;
 
 
+
 public class MapsActivity extends AppCompatActivity
         implements GoogleMap.OnMarkerDragListener,
                     StreetViewPanorama.OnStreetViewPanoramaChangeListener,
                     StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener {
+
+
+    private static final int[] ICON_FILENAMES = {
+            R.drawable.man_0,  R.drawable.man_1,  R.drawable.man_2,  R.drawable.man_3,
+            R.drawable.man_4,  R.drawable.man_5,  R.drawable.man_6,  R.drawable.man_7,
+            R.drawable.man_8,  R.drawable.man_9,  R.drawable.man_10,  R.drawable.man_11,
+            R.drawable.man_12,  R.drawable.man_13,  R.drawable.man_14,  R.drawable.man_15
+    };
 
     private static final String TAG= "MapsActivity";
 
     private static final String MARKER_POSITION_KEY = "MarkerPosition";
 
     private static final LatLng BOISE = new LatLng(43.615032, -116.202335);
-
-    //Possibly wrap the marker into a IconMarker object that includes the offset
-    private static final float ICON_BEARING_OFFSET = 133.0f;
 
     private StreetViewPanorama mStreetViewPanorama;
 
@@ -52,6 +61,11 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.split_street_view_panorama_and_map_demo);
+
+
+        final ViewGroup transitionContainer = (ViewGroup)findViewById(android.R.id.content)
+                .findViewById(R.id.map_container);
+
 
         final LatLng markerPosition;
         if (savedInstanceState == null) {
@@ -70,8 +84,6 @@ public class MapsActivity extends AppCompatActivity
 
         // another way
         getSupportFragmentManager().beginTransaction().hide(streetViewPanoramaFragment).commit();
-
-
 
         streetViewPanoramaFragment.getStreetViewPanoramaAsync(
                 new OnStreetViewPanoramaReadyCallback() {
@@ -119,6 +131,11 @@ public class MapsActivity extends AppCompatActivity
                         float zoom = mMap.getCameraPosition().zoom;
                         Log.i(TAG,"Min Zoom= " + mMap.getMinZoomLevel()  + "  Max Zoom= " + mMap.getMaxZoomLevel());
                         Log.i(TAG, "Camera Zoom level: " + zoom);
+
+                        TransitionSet set = new TransitionSet()
+                                .addTransition(new Slide(Gravity.LEFT));
+
+                        TransitionManager.beginDelayedTransition(transitionContainer,set);
                         if (zoom < 15){
                             // hide street view
                             getSupportFragmentManager().beginTransaction().hide(streetViewPanoramaFragment).commit();
@@ -132,10 +149,11 @@ public class MapsActivity extends AppCompatActivity
                 // Creates a draggable marker. Long press to drag.
                 mMarker = map.addMarker(new MarkerOptions()
                         .position(markerPosition)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.pegman_ptr))
+                        .icon(BitmapDescriptorFactory
+                                .fromResource(ICON_FILENAMES[computeBearingIndex(map.getCameraPosition().bearing)]))
+                        .anchor(.5f,.5f)
                         .draggable(true)
                         .flat(true)
-                        .rotation(ICON_BEARING_OFFSET)   //aligns the pointer to North
                 );
 
 
@@ -211,7 +229,9 @@ public class MapsActivity extends AppCompatActivity
 
             float svpCameraBearing = mStreetViewPanorama.getPanoramaCamera().bearing;
             Log.i(TAG, "Camera bearing: " + svpCameraBearing);
-            mMarker.setRotation(addMarkerIconOffset(svpCameraBearing));
+            //mMarker.setRotation(addMarkerIconOffset(svpCameraBearing));
+            mMarker.setIcon(BitmapDescriptorFactory
+                    .fromResource(ICON_FILENAMES[computeBearingIndex(svpCameraBearing)]));
 
 
         }
@@ -236,11 +256,26 @@ public class MapsActivity extends AppCompatActivity
         Log.i(TAG, "SVPCameraChange - camera angle= " + streetViewPanoramaCamera.bearing);
         float svpCameraBearing = streetViewPanoramaCamera.bearing;
 
-        mMarker.setRotation(addMarkerIconOffset(svpCameraBearing) );
+        mMarker.setIcon(BitmapDescriptorFactory
+                .fromResource(ICON_FILENAMES[computeBearingIndex(svpCameraBearing)]));
     }
 
 
-    private float addMarkerIconOffset(float svpCameraBearing){
-        return svpCameraBearing + ICON_BEARING_OFFSET;
+    public static int computeBearingIndex(float theta){
+
+        // 0<= theta <= 360
+        if (theta < 0){
+            theta += 360.0;
+        }
+
+        //subtract 11.25 degree offset
+        theta = theta - 11.25f;
+        if (theta < 0){
+            theta = 0;
+        }
+
+        int index = (int)Math.ceil(theta/22.5d) % 16;
+
+        return index;
     }
 }
