@@ -3,6 +3,8 @@ package com.keyes_west.mapsgetstarted;
 
 
 import android.Manifest;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -20,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
@@ -61,6 +65,8 @@ public class MapsActivity extends AppCompatActivity
     private static final String MARKER_POSITION_KEY = "MarkerPosition";
 
     private static final LatLng BOISE = new LatLng(43.615032, -116.202335);
+
+    private static final int REQUEST_ERROR = 0;
 
     /**
      * Request code for location permission request.
@@ -285,6 +291,28 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMyLocationClick(@NonNull Location location) {
         Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+    }
+
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int errorCode = apiAvailability.isGooglePlayServicesAvailable(this);
+
+        if (errorCode != ConnectionResult.SUCCESS){
+            Dialog errorDialog = apiAvailability
+                    .getErrorDialog(this, errorCode, REQUEST_ERROR,
+                            new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    finish();
+                                }
+                            });
+
+            errorDialog.show();
+        }
     }
 
 
