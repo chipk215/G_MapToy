@@ -193,6 +193,7 @@ public class MapsActivity extends AppCompatActivity
 
             }
         });
+
         // Creates a draggable marker. Long press to drag.
         mMarker = map.addMarker(new MarkerOptions()
                 .position(mPegmanPosition)
