@@ -2,7 +2,6 @@ package com.keyes_west.mapsgetstarted;
 
 
 import junit.framework.Assert;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,6 +23,8 @@ public class BearingIndexUnitTest {
 
     @Parameterized.Parameters
     public static Collection testCases(){
+
+        // define test angles (theta) and expected index
         return Arrays.asList(new Object[][]{
                 {0.0f, 0},
                 {5.0f, 0},
@@ -37,15 +38,12 @@ public class BearingIndexUnitTest {
                 {-350.0f, 0},
                 {348.75f,15},
                 {236.26f,11}
-
-
         });
     }
 
 
     @Test
     public void checkBearingIndex(){
-
         System.out.println("Test theta is: " + theta);
         Assert.assertEquals(expectedResult, MapsActivity.computeBearingIndex(theta));
 

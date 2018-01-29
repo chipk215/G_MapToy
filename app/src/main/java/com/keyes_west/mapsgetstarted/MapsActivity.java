@@ -79,9 +79,6 @@ public class MapsActivity extends AppCompatActivity
                         getSupportFragmentManager().findFragmentById(R.id.streetviewpanorama);
 
 
-        // this hides the fragment
-        //streetViewPanoramaFragment.getView().setVisibility(View.GONE);
-
         // another way
         getSupportFragmentManager().beginTransaction().hide(streetViewPanoramaFragment).commit();
 
@@ -99,8 +96,6 @@ public class MapsActivity extends AppCompatActivity
                             mStreetViewPanorama.setPosition(BOISE);
                         }
                     }
-
-
                 });
 
         SupportMapFragment mapFragment =
@@ -155,7 +150,6 @@ public class MapsActivity extends AppCompatActivity
                         .draggable(true)
                         .flat(true)
                 );
-
 
 
                 map.getUiSettings().setCompassEnabled(true);
@@ -217,7 +211,6 @@ public class MapsActivity extends AppCompatActivity
         // update the streetview panorama to correlate with pegman
         mStreetViewPanorama.setPosition(marker.getPosition(), 150);
 
-
     }
 
     @Override
@@ -261,6 +254,12 @@ public class MapsActivity extends AppCompatActivity
     }
 
 
+    /**
+     * Map the camera bearing angle to a pegman image file so that the
+     * pointer in the pegman file correlates to the camera angle.
+     * @param theta
+     * @return
+     */
     public static int computeBearingIndex(float theta){
 
         // 0<= theta <= 360
